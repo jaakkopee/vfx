@@ -105,6 +105,14 @@ private:
     cv::Mat kernel;
 };
 
+class VideoEffectCellAutoMata {
+public:
+    VideoEffectCellAutoMata();
+    void apply(const cv::Mat& input, cv::Mat& output, double neighborhood_size, double threshold);
+private:
+    std::vector<std::vector<int>> neighborhood;
+};
+
 void extract_audio(const std::string& filename, std::vector<double>& audiobuffer, int& sample_rate);
 
 #endif // VFX01_HPP

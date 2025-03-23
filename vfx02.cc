@@ -317,6 +317,40 @@ void VideoEffectMotionBlur::apply(const Mat& input, Mat& output, double amount) 
     cout << "Motion blur applied" << endl;
 }
 
+VideoEffectCellAutoMata::VideoEffectCellAutoMata() {
+}
+
+void VideoEffectCellAutoMata::apply(const Mat& input, Mat& output, double neighborhood_size, double amount) {
+    //find the central pixel of each neighborhood
+    int center = neighborhood_size / 2;
+    //create a copy of the input image
+    output = input.clone();
+    //loop through the image
+    for (int y = 0; y < input.rows; y++) {
+        for (int x = 0; x < input.cols; x++) {
+            //get the pixel value
+            Vec3b pixel = input.at<Vec3b>(y, x);
+            //get the neighborhood
+            int sum = 0;
+            for (int i = -center; i <= center; i++) {
+                for (int j = -center; j <= center; j++) {
+                    //check to see if the pixel is within the bounds of the image
+                    if (y + i >= 0 && y + i < input.rows && x + j >= 0 && x + j < input.cols) {
+                        //get the pixel value
+                        Vec3b neighbor = input.at<Vec3b>(y + i, x + j);
+                        //add the pixel value to the sum
+                        sum += neighbor[0] + neighbor[1] + neighbor[2];
+                    }
+                }
+            }
+            //calculate the average pixel value
+            int average = sum / (neighborhood_size * neighborhood_size);
+            //set the pixel value to the average
+            output.at<Vec3b>(y, x) = Vec3b(average, average, average);
+        }
+    }
+}
+
 void extract_audio(const string& filename, std::vector<double>& audiobuffer, int& sample_rate) {
     sf::SoundBuffer buffer;
     if (!buffer.loadFromFile(filename)) {
@@ -375,6 +409,7 @@ int main(int argc, char* argv[]) {
     VideoEffectBrightness vfx2;
     VideoEffectEdgeDetection vfx3;
     VideoEffectMotionBlur vfx4;
+    VideoEffectCellAutoMata vfx5;
 
     Mat frame;
     fftw_complex fftw_output[samples_per_frame];
@@ -436,7 +471,9 @@ int main(int argc, char* argv[]) {
         vfx4.apply(frame, output_frame, brightness);
         frame = output_frame.clone();
         vfx3.apply(frame, output_frame, brightness*12);
-        
+        frame = output_frame.clone();
+        vfx5.apply(frame, output_frame, 10, 8.5);
+
         cout << "Writing frame to output" << endl;
         AVFrame* outputavframe = av_frame_alloc();
         outputavframe->data[0] = output_frame.data;
