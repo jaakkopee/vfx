@@ -473,10 +473,9 @@ int main(int argc, char* argv[]) {
         vfx3.apply(frame, output_frame, brightness*12);
         frame = output_frame.clone();
 
-        int neighborhood_size = brightness;
+        int neighborhood_size = brightness*1600;
         neighborhood_size = neighborhood_size % 16;
-        double threshold = brightness;
-        threshold = threshold / 10;
+        double threshold = brightness*1200;
         vfx5.apply(frame, output_frame, neighborhood_size, threshold);
 
         cout << "Writing frame to output" << endl;
