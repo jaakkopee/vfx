@@ -115,6 +115,17 @@ MediaWriter::~MediaWriter() {
         av_write_trailer(format_ctx);
         avformat_free_context(format_ctx);
     }
+    // Free the codec context
+    if (video_codec_ctx) {
+        avcodec_free_context(&video_codec_ctx);
+    }
+    if (audio_codec_ctx) {
+        avcodec_free_context(&audio_codec_ctx);
+    }
+    //close the output file
+    if (format_ctx && format_ctx->pb) {
+        avio_closep(&format_ctx->pb);
+    }
 }
 
 bool MediaWriter::open(const string& filename) {
@@ -405,11 +416,11 @@ int main(int argc, char* argv[]) {
     cout << "Samples per frame: " << samples_per_frame << endl;
     std::vector<double> samples(samples_per_frame);
 
-    VideoEffectBassMiddleTreble vfx1;
-    VideoEffectBrightness vfx2;
-    VideoEffectEdgeDetection vfx3;
-    VideoEffectMotionBlur vfx4;
-    VideoEffectCellAutoMata vfx5;
+    VideoEffectBassMiddleTreble bassmidtreb;
+    VideoEffectBrightness bright;
+    VideoEffectEdgeDetection edgedetect;
+    VideoEffectMotionBlur motionblur;
+    VideoEffectCellAutoMata cellautomata;
 
     Mat frame;
     fftw_complex fftw_output[samples_per_frame];
@@ -464,18 +475,18 @@ int main(int argc, char* argv[]) {
         cout << "treble: " << treble << endl;
         cout << "brightness: " << brightness << endl;
 
-        vfx2.apply(frame, output_frame, brightness*2);
+        bright.apply(frame, output_frame, brightness*2);
         frame = output_frame.clone();
-        vfx4.apply(frame, output_frame, brightness);
+        edgedetect.apply(frame, output_frame, brightness);
         frame = output_frame.clone();
-        vfx3.apply(frame, output_frame, brightness*12);
+        motionblur.apply(frame, output_frame, brightness*12);
         frame = output_frame.clone();
         
         int neighborhood_size = brightness*1600;
         neighborhood_size = neighborhood_size % 16;
         double threshold = brightness*1200;
-        vfx5.apply(frame, output_frame, neighborhood_size, threshold);
-        vfx1.apply(frame, output_frame, bass*5, middle*2.5, treble*1.25);
+        cellautomata.apply(frame, output_frame, neighborhood_size, threshold);
+        bassmidtreb.apply(frame, output_frame, bass*5, middle*2.5, treble*1.25);
 
         cout << "Writing frame to output" << endl;
         AVFrame* outputavframe = av_frame_alloc();
