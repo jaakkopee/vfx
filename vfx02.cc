@@ -464,19 +464,18 @@ int main(int argc, char* argv[]) {
         cout << "treble: " << treble << endl;
         cout << "brightness: " << brightness << endl;
 
-        vfx1.apply(frame, output_frame, bass, middle, treble);
-        frame = output_frame.clone();
-        vfx2.apply(frame, output_frame, brightness);
+        vfx2.apply(frame, output_frame, brightness*2);
         frame = output_frame.clone();
         vfx4.apply(frame, output_frame, brightness);
         frame = output_frame.clone();
         vfx3.apply(frame, output_frame, brightness*12);
         frame = output_frame.clone();
-
+        
         int neighborhood_size = brightness*1600;
         neighborhood_size = neighborhood_size % 16;
         double threshold = brightness*1200;
         vfx5.apply(frame, output_frame, neighborhood_size, threshold);
+        vfx1.apply(frame, output_frame, bass*5, middle*2.5, treble*1.25);
 
         cout << "Writing frame to output" << endl;
         AVFrame* outputavframe = av_frame_alloc();
