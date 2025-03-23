@@ -384,7 +384,7 @@ int main(int argc, char* argv[]) {
     namedWindow("Frame", WINDOW_NORMAL);
     VideoInputFile input(argv[1]);
     MediaWriter output;
-    if (!output.open("output.mp4")) {
+    if (!output.open("output.avi")) {
         cerr << "Error: cannot open output file" << endl;
         return 1;
     }
