@@ -498,7 +498,6 @@ int main(int argc, char* argv[]) {
             break;
         }
 
-        waitKey(1); 
         //check to see if the user has pressed the escape key
         if (waitKey(1) == 27) {
             //cleanup and exit
