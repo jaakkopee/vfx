@@ -472,7 +472,12 @@ int main(int argc, char* argv[]) {
         frame = output_frame.clone();
         vfx3.apply(frame, output_frame, brightness*12);
         frame = output_frame.clone();
-        vfx5.apply(frame, output_frame, 10, 8.5);
+
+        int neighborhood_size = brightness;
+        neighborhood_size = neighborhood_size % 16;
+        double threshold = brightness;
+        threshold = threshold / 10;
+        vfx5.apply(frame, output_frame, neighborhood_size, threshold);
 
         cout << "Writing frame to output" << endl;
         AVFrame* outputavframe = av_frame_alloc();
