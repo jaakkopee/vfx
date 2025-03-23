@@ -291,12 +291,13 @@ void VideoEffectBrightness::apply(const Mat& input, Mat& output, double brightne
 VideoEffectEdgeDetection::VideoEffectEdgeDetection() {
 }
 
-void VideoEffectEdgeDetection::apply(const Mat& input, Mat& output) {
+void VideoEffectEdgeDetection::apply(const Mat& input, Mat& output, double blend) {
     Mat gray;
     cvtColor(input, gray, COLOR_BGR2GRAY);
     Mat edges;
     Canny(gray, edges, 50, 150);
     cvtColor(edges, output, COLOR_GRAY2BGR);
+    output = blend * output + (1 - blend) * input;
     cout << "Edge detection applied" << endl;
 }
 
@@ -419,7 +420,7 @@ int main(int argc, char* argv[]) {
         bass /= samples_per_frame / 2;
         middle /= samples_per_frame / 2;
         treble /= samples_per_frame / 2;
-        brightness /= samples_per_frame * 200;
+        brightness /= samples_per_frame * 20;
 
         cout << "bass: " << bass << endl;
         cout << "middle: " << middle << endl;
@@ -430,9 +431,9 @@ int main(int argc, char* argv[]) {
         frame = output_frame.clone();
         vfx2.apply(frame, output_frame, brightness);
         frame = output_frame.clone();
-        vfx4.apply(frame, output_frame, 0.01);
-        //frame = output_frame.clone();
-        //vfx3.apply(frame, output_frame);
+        vfx4.apply(frame, output_frame, brightness);
+        frame = output_frame.clone();
+        vfx3.apply(frame, output_frame, brightness*12);
         
         cout << "Writing frame to output" << endl;
         AVFrame* outputavframe = av_frame_alloc();
@@ -444,7 +445,9 @@ int main(int argc, char* argv[]) {
         outputavframe->pts = frame_index;
         output.writeVideoFrame(outputavframe);
         output.writeAudioBuffer((uint8_t*)samples.data(), samples_per_frame, sample_rate, 2);
-
+        //free the frame
+        av_frame_free(&outputavframe);
+        //show the frame
         show_frame(output_frame);
         fftw_destroy_plan(plan);
         //check to see if the video has ended

@@ -94,7 +94,7 @@ private:
 class VideoEffectEdgeDetection {
 public:
     VideoEffectEdgeDetection();
-    void apply(const cv::Mat& input, cv::Mat& output);
+    void apply(const cv::Mat& input, cv::Mat& output, double blend);
 };
 
 class VideoEffectMotionBlur {
