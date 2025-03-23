@@ -92,11 +92,13 @@ double VideoInputFile::getDuration() const {
     return frame_count / frame_rate;
 }
 
+extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavutil/imgutils.h>
 #include <libavutil/samplefmt.h>
 #include <libavutil/timestamp.h>
+}
 
 MediaWriter::MediaWriter() {
     video_codec = nullptr;
