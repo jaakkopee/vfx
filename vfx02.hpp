@@ -115,4 +115,6 @@ private:
 
 void extract_audio(const std::string& filename, std::vector<double>& audiobuffer, int& sample_rate);
 
+bool write_frame(MediaWriter& output, AVFrame* frame, int frame_index, int frame_amount, const std::vector<double>& samples, int samples_per_frame, int sample_rate, int frame_rate); 
+
 #endif // VFX01_HPP

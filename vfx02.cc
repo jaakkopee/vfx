@@ -268,6 +268,21 @@ bool MediaWriter::writeAudioBuffer(uint8_t* buffer, int size, int sample_rate, i
     return ret >= 0;
 }
 
+bool write_frame(MediaWriter& output, AVFrame* frame, int frame_index, int frame_amount, const std::vector<double>& samples, int samples_per_frame, int sample_rate, int frame_rate) {
+    cout << "Writing frame " << frame_index << " of " << frame_amount << endl;
+    AVFrame* outputavframe = av_frame_alloc();
+    outputavframe->data[0] = frame->data[0];
+    outputavframe->linesize[0] = frame->linesize[0];
+    outputavframe->width = frame->width;
+    outputavframe->height = frame->height;
+    outputavframe->format = frame->format;
+    outputavframe->pts = frame_index;
+    output.writeVideoFrame(outputavframe);
+    output.writeAudioBuffer((uint8_t*)samples.data(), samples_per_frame, sample_rate, 2);
+    av_frame_free(&outputavframe);
+    return true;
+}
+
 
 VideoEffectBassMiddleTreble::VideoEffectBassMiddleTreble() {
     bass = 0.0;
@@ -496,11 +511,8 @@ int main(int argc, char* argv[]) {
         outputavframe->height = input.getFrameHeight();
         outputavframe->format = AV_PIX_FMT_BGR24;
         outputavframe->pts = frame_index;
-        output.writeVideoFrame(outputavframe);
-        output.writeAudioBuffer((uint8_t*)samples.data(), samples_per_frame, sample_rate, 2);
-        //free the frame
-        av_frame_free(&outputavframe);
-        //show the frame
+        write_frame(output, outputavframe, frame_index, frame_amount, samples, samples_per_frame, sample_rate, input.getFrameRate());
+
         show_frame(output_frame);
         fftw_destroy_plan(plan);
         //check to see if the video has ended
