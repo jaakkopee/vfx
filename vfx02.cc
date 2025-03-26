@@ -515,6 +515,10 @@ int main(int argc, char* argv[]) {
 
         show_frame(output_frame);
         fftw_destroy_plan(plan);
+        outputavframe->data[0] = nullptr;
+        av_frame_free(&outputavframe);
+        output_frame.release();
+                
         //check to see if the video has ended
         if (frame_index == frame_amount) {
             //cleanup and exit
